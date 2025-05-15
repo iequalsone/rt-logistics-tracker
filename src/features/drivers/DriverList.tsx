@@ -10,13 +10,32 @@ const ITEM_SIZE = 80; // px, adjust as needed for card height
 
 interface DriverListProps {
   onDriverClick?: (driver: Driver) => void;
+  status?: string;
+  searchQuery?: string;
 }
 
-const DriverList: FC<DriverListProps> = ({ onDriverClick }) => {
+const DriverList: FC<DriverListProps> = ({
+  onDriverClick,
+  status = "all",
+  searchQuery = "",
+}) => {
   // Get merged drivers from the central store (includes optimistic updates)
-  const mergedDrivers = useLogisticsStore((state) =>
+  const allDrivers = useLogisticsStore((state) =>
     getMergedDriversSelector(state.drivers, state.vehicles, state.optimistic)
   );
+
+  // Filter drivers based on status and search query
+  const mergedDrivers = allDrivers.filter((driver) => {
+    // Filter by status if not "all"
+    const statusMatch = status === "all" || driver.status === status;
+
+    // Filter by search query if provided
+    const searchMatch =
+      !searchQuery ||
+      driver.name.toLowerCase().includes(searchQuery.toLowerCase());
+
+    return statusMatch && searchMatch;
+  });
 
   if (!mergedDrivers.length)
     return <div className="text-muted-foreground">No drivers found.</div>;

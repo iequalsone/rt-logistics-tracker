@@ -78,7 +78,11 @@ const DriverDashboard: FC<DriverDashboardProps> = ({ markerRefs, mapRef }) => {
           ))}
         </TabsList>
       </Tabs>
-      <DriverList onDriverClick={handleDriverClick} />
+      <DriverList
+        onDriverClick={handleDriverClick}
+        status={status}
+        searchQuery={search}
+      />
     </div>
   );
 };
