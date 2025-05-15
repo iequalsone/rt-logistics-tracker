@@ -103,14 +103,20 @@ export function getMergedVehiclesSelector(
   return vehicles.map((vehicle) => {
     const driver = drivers.find((d) => d.name === vehicle.driverName);
     const optimisticState = driver ? optimistic[driver.id] : undefined;
-    return {
-      ...vehicle,
-      ...(optimisticState?.job !== undefined
-        ? { job: optimisticState.job }
-        : {}),
-      ...(optimisticState?.status !== undefined
-        ? { status: optimisticState.status }
-        : {}),
-    };
+
+    // Create a new vehicle with optimistic updates
+    const updatedVehicle = { ...vehicle };
+
+    // Apply optimistic updates if available
+    if (optimisticState) {
+      if (optimisticState.job !== undefined) {
+        updatedVehicle.job = optimisticState.job;
+      }
+      if (optimisticState.status !== undefined) {
+        updatedVehicle.status = optimisticState.status;
+      }
+    }
+
+    return updatedVehicle;
   });
 }

@@ -11,17 +11,20 @@ interface VehicleMarkerProps {
 const VehicleMarker = forwardRef<LeafletMarker, VehicleMarkerProps>(
   ({ vehicle }, ref) => {
     const optimisticState = useLogisticsStore((s) => s.optimistic);
-    // Find driverId by matching vehicle.driverName to a driver in the store
-    const driverId = Object.keys(optimisticState).find((id) => {
-      // Try to match by driver name (assuming driverName is unique)
-      // This assumes you have access to a driver list in context; otherwise, fallback to id
-      // For now, fallback: if vehicle.driverName is in optimisticState keys
-      return (
-        id === vehicle.driverName ||
-        vehicle.driverName.toLowerCase().includes(id.toLowerCase())
-      );
-    });
-    const isPending = Boolean(driverId && optimisticState[driverId]);
+    const drivers = useLogisticsStore((s) => s.drivers);
+
+    // Find the driver associated with this vehicle
+    const driver = drivers.find((d) => d.name === vehicle.driverName);
+
+    // Check if there's a pending optimistic update for this driver
+    const isPending = Boolean(driver?.id && optimisticState[driver.id]);
+
+    // Get the optimistic status and job directly
+    const optimisticUpdate = driver?.id
+      ? optimisticState[driver.id]
+      : undefined;
+    const status = optimisticUpdate?.status || vehicle.status;
+    const job = optimisticUpdate?.job || vehicle.job;
 
     const icon = new L.Icon({
       iconUrl: "/globe.svg",
@@ -44,9 +47,9 @@ const VehicleMarker = forwardRef<LeafletMarker, VehicleMarkerProps>(
                 </span>
               )}
             </div>
-            <div>Status: {vehicle.status}</div>
+            <div>Status: {status}</div>
             <div>Route: {vehicle.route}</div>
-            <div>Job: {vehicle.job}</div>
+            <div>Job: {job || "No job assigned"}</div>
           </div>
         </Popup>
       </Marker>
