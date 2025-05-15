@@ -43,6 +43,13 @@ const DriverList: FC<DriverListProps> = ({
   // react-window row renderer
   const Row = ({ index, style }: ListChildComponentProps) => {
     const driver = mergedDrivers[index];
+    // Add more detailed logging to help debug status issues
+    const optimisticState = useLogisticsStore((s) => s.optimistic[driver.id]);
+    console.log(
+      `Driver ${driver.name}: status=${
+        driver.status
+      }, optimistic=${JSON.stringify(optimisticState)}`
+    );
     return (
       <div
         style={style}
