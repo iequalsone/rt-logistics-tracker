@@ -3,75 +3,13 @@
 import express from "express";
 import cors from "cors";
 import type { Request, Response } from "express";
+import { drivers, vehicles, jobManager } from "./shared-data.js";
 
 const app = express();
 const PORT = 3002;
 
 app.use(cors());
 app.use(express.json());
-
-// In-memory mock data
-const drivers = [
-  {
-    id: "1",
-    name: "Alice",
-    status: "Active",
-    vehicleId: "1",
-    currentJob: "Delivery",
-  },
-  {
-    id: "2",
-    name: "Bob",
-    status: "Idle",
-    vehicleId: "2",
-    currentJob: "Pickup",
-  },
-  {
-    id: "3",
-    name: "Charlie",
-    status: "Offline",
-    vehicleId: null,
-    currentJob: null,
-  },
-];
-
-const vehicles = [
-  {
-    id: "1",
-    name: "Truck 1",
-    lat: 37.7749,
-    lng: -122.4194,
-    driverName: "Alice",
-    status: "Active",
-    route: "A",
-    job: "Delivery",
-  },
-  {
-    id: "2",
-    name: "Van 2",
-    lat: 37.7849,
-    lng: -122.4094,
-    driverName: "Bob",
-    status: "Idle",
-    route: "B",
-    job: "Pickup",
-  },
-  {
-    id: "3",
-    name: "Car 3",
-    lat: 37.7649,
-    lng: -122.4294,
-    driverName: "Charlie",
-    status: "Offline",
-    route: "C",
-    job: null,
-  },
-];
-
-let jobs = [
-  { id: "j1", type: "Delivery", assignedTo: "1", status: "active" },
-  { id: "j2", type: "Pickup", assignedTo: "2", status: "active" },
-];
 
 // REST endpoints
 app.get("/drivers", function (req: Request, res: Response) {
@@ -81,7 +19,7 @@ app.get("/vehicles", function (req: Request, res: Response) {
   res.json(vehicles);
 });
 app.get("/jobs", function (req: Request, res: Response) {
-  res.json(jobs);
+  res.json(jobManager.jobs);
 });
 
 app.post("/assign-job", function (req: Request, res: Response) {
@@ -95,8 +33,8 @@ app.post("/assign-job", function (req: Request, res: Response) {
       vehicle.job = job;
       vehicle.status = "Active";
     }
-    jobs.push({
-      id: `j${jobs.length + 1}`,
+    jobManager.addJob({
+      id: `j${jobManager.jobs.length + 1}`,
       type: job,
       assignedTo: driverId,
       status: "active",
@@ -144,9 +82,7 @@ app.post("/complete-job", function (req: Request, res: Response) {
       vehicle.job = null;
       vehicle.status = "Idle";
     }
-    jobs = jobs.map((j) =>
-      j.assignedTo === driverId ? { ...j, status: "completed" } : j
-    );
+    jobManager.updateJobStatus(driverId, "completed");
     res.json({ success: true });
   } else {
     res.status(404).json({ success: false });
