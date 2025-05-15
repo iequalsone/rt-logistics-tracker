@@ -10,19 +10,22 @@ export function useDispatchActions() {
 
   async function assignJob(driverId: string, job: string): Promise<boolean> {
     setLoading(true);
+    // Make sure we explicitly set both job and status to Active when assigning a job
     setOptimistic(driverId, { job, status: "Active" });
     try {
       const res = await fetch("http://localhost:3002/assign-job", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ driverId, job }),
+        // Explicitly send the status change along with the job
+        body: JSON.stringify({ driverId, job, status: "Active" }),
       });
       if (!res.ok) throw new Error();
       toast.success(`Job '${job}' assigned to driver.`);
       setLoading(false);
-      clearOptimistic(driverId);
+      // Don't clear optimistic update here, let the real-time update handle it
       return true;
     } catch {
+      // Only clear optimistic update on error
       clearOptimistic(driverId);
       toast.error("Failed to assign job. Please try again.");
       setLoading(false);
@@ -32,19 +35,22 @@ export function useDispatchActions() {
 
   async function reassignJob(driverId: string, job: string): Promise<boolean> {
     setLoading(true);
+    // Make sure we explicitly set both job and status to Active when reassigning a job
     setOptimistic(driverId, { job, status: "Active" });
     try {
       const res = await fetch("http://localhost:3002/assign-job", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ driverId, job }),
+        // Explicitly send the status change along with the job
+        body: JSON.stringify({ driverId, job, status: "Active" }),
       });
       if (!res.ok) throw new Error();
       toast.success(`Job '${job}' reassigned to driver.`);
       setLoading(false);
-      clearOptimistic(driverId);
+      // Don't clear optimistic update here, let the real-time update handle it
       return true;
     } catch {
+      // Only clear optimistic update on error
       clearOptimistic(driverId);
       toast.error("Failed to reassign job. Please try again.");
       setLoading(false);
