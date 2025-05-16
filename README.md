@@ -235,6 +235,90 @@ logis-tracker/
 └── mocks-dist/                # Compiled mock servers
 ```
 
+### Architectural Decisions and Design Trade-offs
+
+This section explains the key architectural decisions made during the development of LogisTracker and the rationale behind them.
+
+#### 1. Feature-Based Architecture
+
+**Decision**: Organize code by feature modules rather than by technical layers.
+
+**Rationale**:
+
+- Improves maintainability by co-locating related components and logic
+- Supports better scaling as new features can be added independently
+- Reduces cognitive load when working on a specific feature
+
+**Trade-offs**:
+
+- May lead to some code duplication across features
+- Requires clear boundaries between feature modules
+
+#### 2. Shared State Management with Zustand
+
+**Decision**: Use Zustand for global state management instead of Context API or Redux.
+
+**Rationale**:
+
+- Lighter weight than Redux with less boilerplate
+- More performant than React Context for complex state
+- Easy implementation of optimistic updates
+- Simple API with hooks-based access to state
+
+**Trade-offs**:
+
+- Less established ecosystem compared to Redux
+- Fewer developer tools for debugging
+
+#### 3. Mock Servers with Shared Data Module
+
+**Decision**: Implement separate REST API and WebSocket servers that share a common data module.
+
+**Rationale**:
+
+- Simulates real-world separation of concerns between REST and real-time services
+- Allows for independent scaling in a production environment
+- Shared data module maintains data consistency across services
+- Easy to replace with real backend services in the future
+
+**Trade-offs**:
+
+- Increases complexity by requiring management of multiple servers
+- Requires careful handling of shared state to avoid race conditions
+
+#### 4. Optimistic UI Updates
+
+**Decision**: Implement optimistic updates for user actions.
+
+**Rationale**:
+
+- Provides immediate feedback to users, enhancing perceived performance
+- Reduces need for loading states
+- Graceful fallback if server updates fail
+
+**Trade-offs**:
+
+- Requires more complex state management
+- Can lead to confusing UX if server responses conflict with optimistic updates
+- Needs careful reconciliation logic between optimistic and server states
+
+#### 5. React Server Components with Client Islands
+
+**Decision**: Use Next.js App Router with a mix of server and client components.
+
+**Rationale**:
+
+- Better performance through reduced client-side JavaScript
+- SEO benefits from server rendering
+- Improved initial page load times
+- Client islands for interactive elements like the map and driver list
+
+**Trade-offs**:
+
+- Increased complexity in component architecture
+- Need to carefully manage client/server boundaries
+- Some limitations on library usage in server components
+
 ### Data Synchronization
 
 The application implements optimistic updates to provide immediate feedback to users while ensuring data consistency:
